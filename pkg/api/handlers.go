@@ -51,7 +51,7 @@ func Handler_NextDate(w http.ResponseWriter, r *http.Request) {
 	if now == "" {
 		nowTime = time.Now()
 	} else {
-		nowTime, err = time.Parse("20060102", now)
+		nowTime, err = time.Parse(layout, now)
 		if err != nil {
 			errHandler(w, "Invalid now parameter", err, http.StatusBadRequest)
 			return
@@ -66,6 +66,10 @@ func Handler_NextDate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte(nextDate))
+}
+
+type successResponse struct {
+	ID int64 `json:"id"`
 }
 
 func AddTaskHandle(w http.ResponseWriter, r *http.Request) {
@@ -89,15 +93,15 @@ func AddTaskHandle(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(layout)
 	} else {
-		if _, err := time.Parse("20060102", task.Date); err != nil {
+		if _, err := time.Parse(layout, task.Date); err != nil {
 			errHandler(w, "Incorrect date format (expected YYYYMMDD)", err, http.StatusBadRequest)
 			return
 		}
 	}
 
-	t, err := time.Parse("20060102", task.Date)
+	t, err := time.Parse(layout, task.Date)
 	if err != nil {
 		errHandler(w, "Incorrect date", err, http.StatusBadRequest)
 		return
@@ -105,7 +109,7 @@ func AddTaskHandle(w http.ResponseWriter, r *http.Request) {
 
 	if afterNow(now, t) {
 		if task.Repeat == "" || task.Repeat == "d 1" {
-			task.Date = now.Format("20060102")
+			task.Date = now.Format(layout)
 		} else {
 			next, err := nextDate(now, task.Date, task.Repeat)
 			if err != nil {
@@ -123,13 +127,11 @@ func AddTaskHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successResponse := struct {
-		ID int64 `json:"id"`
-	}{
+	sucRes := successResponse{
 		ID: id,
 	}
 
-	res, err := json.Marshal(successResponse)
+	res, err := json.Marshal(sucRes)
 	if err != nil {
 		errHandler(w, "Failed to encode JSON", err, http.StatusBadRequest)
 		return
@@ -143,7 +145,7 @@ func GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	search := r.URL.Query().Get("search")
 	if t, err := time.Parse("02.01.2006", search); err == nil {
-		search = t.Format("20060102")
+		search = t.Format(layout)
 		tip = "time"
 	} else {
 		tip = "default"
@@ -223,15 +225,15 @@ func PutTaskHandler(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(layout)
 	} else {
-		if _, err := time.Parse("20060102", task.Date); err != nil {
+		if _, err := time.Parse(layout, task.Date); err != nil {
 			errHandler(w, "Incorrect date format (expected YYYYMMDD)", err, http.StatusBadRequest)
 			return
 		}
 	}
 
-	t, err := time.Parse("20060102", task.Date)
+	t, err := time.Parse(layout, task.Date)
 	if err != nil {
 		errHandler(w, "Incorrect date", err, http.StatusBadRequest)
 		return
@@ -239,7 +241,7 @@ func PutTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	if afterNow(now, t) {
 		if task.Repeat == "" || task.Repeat == "d 1" {
-			task.Date = now.Format("20060102")
+			task.Date = now.Format(layout)
 		} else {
 			next, err := nextDate(now, task.Date, task.Repeat)
 			if err != nil {
@@ -345,8 +347,13 @@ func SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	envPass := "8888"
+	if p := os.Getenv("TODO_PASSWORD"); p != "" {
+		envPass = p
+	}
+
 	password := pasStruct["password"].(string)
-	if password == os.Getenv("TODO_PASSWORD") {
+	if password == envPass {
 		token, err := generateJWT(password)
 		if err != nil {
 			errHandler(w, "Could not generate JWT token", err, http.StatusBadRequest)

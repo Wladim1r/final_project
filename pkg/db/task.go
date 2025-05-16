@@ -30,7 +30,7 @@ func AddTask(t Task) (int64, error) {
 }
 
 func GetTask(id string) (*Task, error) {
-	query := `SELECT * FROM scheduler WHERE id = ?`
+	query := `SELECT id, date, title, comment, repeat FROM scheduler WHERE id = ?`
 	row := db.QueryRow(query, id)
 
 	var task Task
@@ -109,6 +109,10 @@ func Tasks(limit int, search, tip string) ([]*Task, error) {
 		err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
 		if err != nil {
 			return nil, fmt.Errorf("Could not read row %w\n", err)
+		}
+
+		if err = rows.Err(); err != nil {
+			return nil, fmt.Errorf("Row error %w\n", err)
 		}
 
 		tasks = append(tasks, &task)

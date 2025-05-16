@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -16,6 +17,8 @@ func Run(r *chi.Mux) error {
 	if p := os.Getenv("TODO_PORT"); p != "" {
 		port = p
 	}
+
+	log.Printf("Приложение запущено на порту: %s", port)
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		return err
