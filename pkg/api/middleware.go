@@ -9,13 +9,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var pass = os.Getenv("TODO_PASSWORD")
+
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := godotenv.Load(); err != nil {
 			return
 		}
 
-		pass := os.Getenv("TODO_PASSWORD")
 		if len(pass) > 0 {
 			var jwtToken string
 

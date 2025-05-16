@@ -10,10 +10,11 @@ import (
 )
 
 func main() {
-	_, err := db.InitDB()
+	db, err := db.InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 
 	r := chi.NewRouter()
 
