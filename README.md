@@ -7,7 +7,7 @@
     TODO_DBFILE=scheduler.db
     TODO_PASSWORD=8888
 
-    В браузере следует указать url: http://localhost:7540/api/signin
+    В браузере следует перейти по url: http://localhost:7540/login.html
 
    Чтобы запустить код, из корневой директории следует написать в консоль: go run cmd/main.go 
 

@@ -6,15 +6,14 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
 var pass = os.Getenv("TODO_PASSWORD")
 
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if err := godotenv.Load(); err != nil {
-			return
+		if pass == "" {
+			pass = "8888"
 		}
 
 		if len(pass) > 0 {
@@ -39,7 +38,7 @@ func Auth(next http.Handler) http.Handler {
 			}
 
 			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				if claims["user_password"] != os.Getenv("TODO_PASSWORD") {
+				if claims["user_password"] != pass {
 					errHandler(w, "Invalid token payload", nil, http.StatusUnauthorized)
 				}
 			}

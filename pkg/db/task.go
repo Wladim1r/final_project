@@ -103,16 +103,16 @@ func Tasks(limit int, search, tip string) ([]*Task, error) {
 
 	tasks := []*Task{}
 
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Row error %w\n", err)
+	}
+
 	for rows.Next() {
 		var task Task
 
 		err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
 		if err != nil {
 			return nil, fmt.Errorf("Could not read row %w\n", err)
-		}
-
-		if err = rows.Err(); err != nil {
-			return nil, fmt.Errorf("Row error %w\n", err)
 		}
 
 		tasks = append(tasks, &task)
