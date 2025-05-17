@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const layout = "20060102"
+
 var checkList = map[string]struct{}{
 	"d": {},
 	"w": {},
@@ -23,7 +25,7 @@ func afterNow(date, now time.Time) bool {
 }
 
 func nextDate(now time.Time, dstart string, repeat string) (string, error) {
-	date, err := time.Parse("20060102", dstart)
+	date, err := time.Parse(layout, dstart)
 	if err != nil {
 		return "", fmt.Errorf("Could not to parse dstart %w\n", err)
 	}
@@ -135,7 +137,7 @@ func nextDate(now time.Time, dstart string, repeat string) (string, error) {
 		}
 	}
 
-	outDate := date.Format("20060102")
+	outDate := date.Format(layout)
 	return outDate, nil
 }
 

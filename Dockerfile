@@ -8,15 +8,16 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/bin/scheduler ./cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/bin/scheduler ./main.go
 
 
 ## Final state
 FROM alpine:3.21
 
-WORKDIR /shced
+WORKDIR /sched
 
 COPY --from=builder /app/bin/scheduler .
+COPY --from=builder /app/web ./web
 
 EXPOSE 7540
 
